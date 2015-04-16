@@ -22,7 +22,9 @@ import java.util.Arrays;
 import java.util.Iterator;
 
 import org.deidentifier.arx.ARXLattice.ARXNode;
+import org.deidentifier.arx.ARXPopulationModel.Region;
 import org.deidentifier.arx.RiskBasedBenchmarkSetup.BenchmarkDataset;
+import org.deidentifier.arx.criteria.PopulationUniqueness;
 
 /**
  * Main benchmark class.
@@ -73,6 +75,7 @@ public class RiskBasedBenchmarkMain {
     private static void anonymize(BenchmarkDataset dataset) throws IOException {
         Data data = RiskBasedBenchmarkSetup.getData(dataset);
         ARXConfiguration config = RiskBasedBenchmarkSetup.getConfiguration(dataset);
+        config.addCriterion(new PopulationUniqueness(0.01d, ARXPopulationModel.create(Region.USA)));
         ARXAnonymizer anonymizer = new ARXAnonymizer();
         long time = System.currentTimeMillis();
         ARXResult result = anonymizer.anonymize(data, config);

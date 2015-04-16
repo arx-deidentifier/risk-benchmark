@@ -19,9 +19,7 @@ package org.deidentifier.arx;
 
 import java.io.IOException;
 
-import org.deidentifier.arx.ARXPopulationModel.Region;
 import org.deidentifier.arx.AttributeType.Hierarchy;
-import org.deidentifier.arx.criteria.PopulationUniqueness;
 import org.deidentifier.arx.metric.Metric;
 
 /**
@@ -74,7 +72,6 @@ public class RiskBasedBenchmarkSetup {
         ARXConfiguration config = ARXConfiguration.create();
         config.setMetric(Metric.createLossMetric());
         config.setMaxOutliers(1.0d);
-        config.addCriterion(new PopulationUniqueness(0.01d, ARXPopulationModel.create(Region.USA)));
         return config;
     }
 
