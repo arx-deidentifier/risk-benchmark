@@ -94,6 +94,7 @@ public class RiskBasedBenchmarkMain {
         System.out.println(" - Tuple         : " + Arrays.toString(getTuple(iter)));
         System.out.println(" - Suppressed    : " + getSuppressed(result.getOutput()));
         System.out.println(" - Transformation: " + Arrays.toString(result.getGlobalOptimum().getTransformation()));
+        System.out.println(" - Heights       : " + Arrays.toString(result.getLattice().getTop().getTransformation()));
         System.out.println(" - Total         : " + data.getHandle().getNumRows());
         System.out.println(" - Infoloss      : " + result.getGlobalOptimum().getMinimumInformationLoss().toString());
     }
