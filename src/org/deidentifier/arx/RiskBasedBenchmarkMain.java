@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Iterator;
 
+import org.deidentifier.arx.ARXLattice.ARXNode;
 import org.deidentifier.arx.RiskBasedBenchmarkSetup.BenchmarkDataset;
 
 /**
@@ -50,6 +51,20 @@ public class RiskBasedBenchmarkMain {
     }
 
     /**
+     * Returns whether all entries are equal
+     * 
+     * @param tuple
+     * @return
+     */
+    private static boolean allEqual(String[] tuple) {
+        String value = tuple[0];
+        for (int i = 1; i < tuple.length; i++) {
+            if (!tuple[i].equals(value)) { return false; }
+        }
+        return true;
+    }
+
+    /**
      * Performs the experiments
      * 
      * @param dataset
@@ -71,6 +86,7 @@ public class RiskBasedBenchmarkMain {
         System.out.println(" - Time          : " + time + " [ms]");
         System.out.println(" - QIs           : " + data.getDefinition().getQuasiIdentifyingAttributes().size());
         System.out.println(" - Search space  : " + searchSpaceSize);
+        System.out.println(" - Checked       : " + getCheckedTransformations(result));
         System.out.println(" - Header        : " + Arrays.toString(iter.next()));
         System.out.println(" - Tuple         : " + Arrays.toString(getTuple(iter)));
         System.out.println(" - Suppressed    : " + getSuppressed(result.getOutput()));
@@ -80,31 +96,20 @@ public class RiskBasedBenchmarkMain {
     }
 
     /**
-     * Returns the first tuple that is not suppressed
-     * 
-     * @param iter
+     * Returns the number of checked transformations
+     * @param result
      * @return
      */
-    private static String[] getTuple(Iterator<String[]> iter) {
-        String[] tuple = iter.next();
-        while (allEqual(tuple)) {
-            tuple = iter.next();
+    private static int getCheckedTransformations(ARXResult result) {
+        int count = 0;
+        for (ARXNode[] level : result.getLattice().getLevels()) {
+            for (ARXNode node : level) {
+                if (node.isChecked()) {
+                    count++;
+                }
+            }
         }
-        return tuple;
-    }
-
-    /**
-     * Returns whether all entries are equal
-     * 
-     * @param tuple
-     * @return
-     */
-    private static boolean allEqual(String[] tuple) {
-        String value = tuple[0];
-        for (int i = 1; i < tuple.length; i++) {
-            if (!tuple[i].equals(value)) { return false; }
-        }
-        return true;
+        return count;
     }
 
     /**
@@ -121,5 +126,19 @@ public class RiskBasedBenchmarkMain {
             }
         }
         return count;
+    }
+
+    /**
+     * Returns the first tuple that is not suppressed
+     * 
+     * @param iter
+     * @return
+     */
+    private static String[] getTuple(Iterator<String[]> iter) {
+        String[] tuple = iter.next();
+        while (allEqual(tuple)) {
+            tuple = iter.next();
+        }
+        return tuple;
     }
 }
