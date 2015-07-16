@@ -22,9 +22,10 @@ import java.util.Arrays;
 import java.util.Iterator;
 
 import org.deidentifier.arx.ARXLattice.ARXNode;
-import org.deidentifier.arx.ARXPopulationModel.Region;
+import org.deidentifier.arx.BenchmarkSetup.BenchmarkCriterion;
 import org.deidentifier.arx.BenchmarkSetup.BenchmarkDataset;
-import org.deidentifier.arx.criteria.PopulationUniqueness;
+import org.deidentifier.arx.metric.InformationLoss;
+import org.deidentifier.arx.metric.v2.ILMultiDimensionalRank;
 
 /**
  * Main benchmark class.
@@ -32,10 +33,10 @@ import org.deidentifier.arx.criteria.PopulationUniqueness;
  * @author Fabian Prasser
  */
 public class BenchmarkExperiment1 {
-
+    
     /** Repetitions */
-    private static final int REPETITIONS = 5;
-
+    private static final int REPETITIONS = 1;
+    
     /**
      * Main entry point
      * 
@@ -43,15 +44,17 @@ public class BenchmarkExperiment1 {
      * @throws IOException
      */
     public static void main(String[] args) throws IOException {
-
+        
         // Repeat for each data set
         for (BenchmarkDataset data : BenchmarkSetup.getDatasets()) {
-            for (int i = 0; i < REPETITIONS; i++) {
-                anonymize(data);
+            for (BenchmarkCriterion criterion : BenchmarkSetup.getCriteria()) {
+                for (int i = 0; i < REPETITIONS; i++) {
+                     anonymize(data, criterion);
+                }
             }
         }
     }
-
+    
     /**
      * Returns whether all entries are equal
      * 
@@ -61,21 +64,22 @@ public class BenchmarkExperiment1 {
     private static boolean allEqual(String[] tuple) {
         String value = tuple[0];
         for (int i = 1; i < tuple.length; i++) {
-            if (!tuple[i].equals(value)) { return false; }
+            if (!tuple[i].equals(value)) {
+                return false;
+            }
         }
         return true;
     }
-
+    
     /**
      * Performs the experiments
      * 
      * @param dataset
      * @throws IOException
      */
-    private static void anonymize(BenchmarkDataset dataset) throws IOException {
-        Data data = BenchmarkSetup.getData(dataset);
-        ARXConfiguration config = BenchmarkSetup.getConfiguration(dataset);
-        config.addCriterion(new PopulationUniqueness(0.01d, ARXPopulationModel.create(Region.USA)));
+    private static void anonymize(BenchmarkDataset dataset, BenchmarkCriterion criterion) throws IOException {
+        Data data = BenchmarkSetup.getData(dataset, criterion);
+        ARXConfiguration config = BenchmarkSetup.getConfiguration(dataset, criterion);
         ARXAnonymizer anonymizer = new ARXAnonymizer();
         long time = System.currentTimeMillis();
         ARXResult result = anonymizer.anonymize(data, config);
@@ -86,19 +90,34 @@ public class BenchmarkExperiment1 {
         }
         Iterator<String[]> iter = result.getOutput().iterator();
         System.out.println(dataset);
+        System.out.println(" - Criterion     : " + criterion.name());
         System.out.println(" - Time          : " + time + " [ms]");
         System.out.println(" - QIs           : " + data.getDefinition().getQuasiIdentifyingAttributes().size());
         System.out.println(" - Search space  : " + searchSpaceSize);
-        System.out.println(" - Checked       : " + getCheckedTransformations(result));
+        int checkedTransformations = getCheckedTransformations(result);
+        System.out.println(" - Checked       : " + checkedTransformations + " (pruned: " + (100 - (((double) checkedTransformations / (double) searchSpaceSize) * 100d)) + "%)");
         System.out.println(" - Header        : " + Arrays.toString(iter.next()));
         System.out.println(" - Tuple         : " + Arrays.toString(getTuple(iter)));
-        System.out.println(" - Suppressed    : " + getSuppressed(result.getOutput()));
+        int suppressed = getSuppressed(result.getOutput());
+        System.out.println(" - Suppressed    : " + suppressed + " (" + ((double) suppressed / (double) data.getHandle().getNumRows()) * 100d + "%)");
         System.out.println(" - Transformation: " + Arrays.toString(result.getGlobalOptimum().getTransformation()));
         System.out.println(" - Heights       : " + Arrays.toString(result.getLattice().getTop().getTransformation()));
         System.out.println(" - Total         : " + data.getHandle().getNumRows());
         System.out.println(" - Infoloss      : " + result.getGlobalOptimum().getMinimumInformationLoss().toString());
+        System.out.println(" - Relative      : " + getRelativeLoss(result.getGlobalOptimum().getMinimumInformationLoss()));
     }
-
+    
+    private static double getRelativeLoss(InformationLoss<?> loss) {
+        double[] values = ((ILMultiDimensionalRank) loss).getValue();
+        double result = 1.0d;
+        for (int i = 0; i < values.length; i++) {
+            result *= Math.pow(values[i] + 1d, 1.0d / (double) values.length);
+        }
+        result -= 1d;
+        result *= 100d;
+        return result;
+    }
+    
     /**
      * Returns the number of checked transformations
      * @param result
@@ -115,7 +134,7 @@ public class BenchmarkExperiment1 {
         }
         return count;
     }
-
+    
     /**
      * Returns the number of suppressed tuples
      * 
@@ -131,7 +150,7 @@ public class BenchmarkExperiment1 {
         }
         return count;
     }
-
+    
     /**
      * Returns the first tuple that is not suppressed
      * 

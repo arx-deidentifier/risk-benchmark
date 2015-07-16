@@ -19,7 +19,10 @@ package org.deidentifier.arx;
 
 import java.io.IOException;
 
+import org.deidentifier.arx.ARXPopulationModel.Region;
 import org.deidentifier.arx.AttributeType.Hierarchy;
+import org.deidentifier.arx.criteria.KAnonymity;
+import org.deidentifier.arx.criteria.PopulationUniqueness;
 import org.deidentifier.arx.metric.Metric;
 
 /**
@@ -27,7 +30,22 @@ import org.deidentifier.arx.metric.Metric;
  * @author Fabian Prasser
  */
 public class BenchmarkSetup {
-
+    
+    public static enum BenchmarkCriterion {
+        K_ANONYMITY {
+            @Override
+            public String toString() {
+                return "k";
+            }
+        },
+        RISK_BASED {
+            @Override
+            public String toString() {
+                return "t";
+            }
+        },
+    }
+    
     public static enum BenchmarkDataset {
         ADULT {
             @Override
@@ -60,7 +78,7 @@ public class BenchmarkSetup {
             }
         },
     }
-
+    
     /**
      * Returns a configuration for the ARX framework
      * @param dataset
@@ -68,22 +86,40 @@ public class BenchmarkSetup {
      * @return
      * @throws IOException
      */
-    public static ARXConfiguration getConfiguration(BenchmarkDataset dataset) throws IOException {
+    public static ARXConfiguration getConfiguration(BenchmarkDataset dataset, BenchmarkCriterion criterion) throws IOException {
         ARXConfiguration config = ARXConfiguration.create();
         config.setMetric(Metric.createLossMetric());
         config.setMaxOutliers(1.0d);
+        
+        switch (criterion) {
+        case RISK_BASED:
+            config.addCriterion(new PopulationUniqueness(0.01d, ARXPopulationModel.create(Region.USA)));
+            break;
+        case K_ANONYMITY:
+            config.addCriterion(new KAnonymity(5));
+            break;
+        default:
+            throw new RuntimeException("Invalid criterion");
+        }
         return config;
     }
-
+    
+    public static BenchmarkCriterion[] getCriteria() {
+        return new BenchmarkCriterion[] {
+                BenchmarkCriterion.K_ANONYMITY,
+                BenchmarkCriterion.RISK_BASED,
+        };
+    }
+    
     /**
-     * Configures and returns the dataset 
+     * Configures and returns the dataset
      * @param dataset
      * @param criteria
      * @return
      * @throws IOException
      */
-
-    public static Data getData(BenchmarkDataset dataset) throws IOException {
+    
+    public static Data getData(BenchmarkDataset dataset, BenchmarkCriterion criterion) throws IOException {
         Data data = null;
         switch (dataset) {
         case ADULT:
@@ -104,28 +140,28 @@ public class BenchmarkSetup {
         default:
             throw new RuntimeException("Invalid dataset");
         }
-
-            for (String qi : getQuasiIdentifyingAttributes(dataset)) {
-                data.getDefinition().setAttributeType(qi, getHierarchy(dataset, qi));
-            }
-
+        
+        for (String qi : getQuasiIdentifyingAttributes(dataset)) {
+            data.getDefinition().setAttributeType(qi, getHierarchy(dataset, qi));
+        }
+        
         return data;
     }
-
+    
     /**
      * Returns all datasets
      * @return
      */
     public static BenchmarkDataset[] getDatasets() {
-        return new BenchmarkDataset[] { 
-         BenchmarkDataset.ADULT,
-         BenchmarkDataset.CUP,
-         BenchmarkDataset.FARS,
-         BenchmarkDataset.ATUS,
-         BenchmarkDataset.IHIS
-                                        };
+        return new BenchmarkDataset[] {
+                BenchmarkDataset.ADULT,
+                BenchmarkDataset.CUP,
+                BenchmarkDataset.FARS,
+                BenchmarkDataset.ATUS,
+                BenchmarkDataset.IHIS
+        };
     }
-
+    
     /**
      * Returns the generalization hierarchy for the dataset and attribute
      * @param dataset
@@ -149,7 +185,7 @@ public class BenchmarkSetup {
             throw new RuntimeException("Invalid dataset");
         }
     }
-
+    
     /**
      * Returns the quasi-identifiers for the dataset
      * @param dataset
@@ -166,7 +202,7 @@ public class BenchmarkSetup {
                                     "salary-class",
                                     "sex",
                                     "workclass",
-                                    "occupation"};
+                                    "occupation" };
         case ATUS:
             return new String[] {   "Age",
                                     "Birthplace",
@@ -176,7 +212,7 @@ public class BenchmarkSetup {
                                     "Race",
                                     "Region",
                                     "Sex",
-                                    "Highest level of school completed"};
+                                    "Highest level of school completed" };
         case CUP:
             return new String[] {   "AGE",
                                     "GENDER",
@@ -185,7 +221,7 @@ public class BenchmarkSetup {
                                     "NGIFTALL",
                                     "STATE",
                                     "ZIP",
-                                    "RAMNTALL"};
+                                    "RAMNTALL" };
         case FARS:
             return new String[] {   "iage",
                                     "ideathday",
@@ -194,7 +230,7 @@ public class BenchmarkSetup {
                                     "iinjury",
                                     "irace",
                                     "isex",
-                                    "istatenum"};
+                                    "istatenum" };
         case IHIS:
             return new String[] {   "AGE",
                                     "MARSTAT",
@@ -204,7 +240,7 @@ public class BenchmarkSetup {
                                     "REGION",
                                     "SEX",
                                     "YEAR",
-                                    "EDUC"};
+                                    "EDUC" };
         default:
             throw new RuntimeException("Invalid dataset");
         }
