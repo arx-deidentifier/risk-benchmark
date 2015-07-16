@@ -36,7 +36,7 @@ import org.deidentifier.arx.risk.RiskModelPopulationUniqueness.PopulationUniquen
  */
 public class BenchmarkSetup {
     
-    public static enum BenchmarkCriterion {
+    public static enum BenchmarkPrivacyModel {
         K_ANONYMITY {
             @Override
             public String toString() {
@@ -108,35 +108,36 @@ public class BenchmarkSetup {
      * Returns a configuration for the ARX framework
      * @param dataset
      * @param criteria
+     * @param uniqueness
      * @return
      * @throws IOException
      */
-    public static ARXConfiguration getConfiguration(BenchmarkDataset dataset, BenchmarkCriterion criterion) throws IOException {
+    public static ARXConfiguration getConfiguration(BenchmarkDataset dataset, BenchmarkPrivacyModel criterion, double uniqueness) throws IOException {
         ARXConfiguration config = ARXConfiguration.create();
         config.setMetric(Metric.createLossMetric());
         config.setMaxOutliers(1.0d);
         
         switch (criterion) {
         case UNIQUENESS_DANKAR:
-            config.addCriterion(new PopulationUniqueness(0.01d, 
+            config.addCriterion(new PopulationUniqueness(uniqueness, 
                                                          PopulationUniquenessModel.DANKAR,
                                                          ARXPopulationModel.create(Region.USA),
                                                          ARXSolverConfiguration.create().startValues(SOLVER_START_VALUES)));
             break;
         case UNIQUENESS_SNB:
-            config.addCriterion(new PopulationUniqueness(0.01d, 
+            config.addCriterion(new PopulationUniqueness(uniqueness, 
                                                          PopulationUniquenessModel.SNB,
                                                          ARXPopulationModel.create(Region.USA),
                                                          ARXSolverConfiguration.create().startValues(SOLVER_START_VALUES)));
             break;
         case UNIQUENESS_PITMAN:
-            config.addCriterion(new PopulationUniqueness(0.01d, 
+            config.addCriterion(new PopulationUniqueness(uniqueness, 
                                                          PopulationUniquenessModel.PITMAN,
                                                          ARXPopulationModel.create(Region.USA),
                                                          ARXSolverConfiguration.create().startValues(SOLVER_START_VALUES)));
             break;
         case UNIQUENESS_ZAYATZ:
-            config.addCriterion(new PopulationUniqueness(0.01d, 
+            config.addCriterion(new PopulationUniqueness(uniqueness, 
                                                          PopulationUniquenessModel.ZAYATZ,
                                                          ARXPopulationModel.create(Region.USA),
                                                          ARXSolverConfiguration.create().startValues(SOLVER_START_VALUES)));
@@ -158,7 +159,7 @@ public class BenchmarkSetup {
      * @throws IOException
      */
     
-    public static Data getData(BenchmarkDataset dataset, BenchmarkCriterion criterion) throws IOException {
+    public static Data getData(BenchmarkDataset dataset, BenchmarkPrivacyModel criterion) throws IOException {
         Data data = null;
         switch (dataset) {
         case ADULT:

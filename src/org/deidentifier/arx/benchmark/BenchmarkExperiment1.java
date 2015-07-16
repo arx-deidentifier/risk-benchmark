@@ -27,7 +27,7 @@ import org.deidentifier.arx.ARXResult;
 import org.deidentifier.arx.Data;
 import org.deidentifier.arx.DataHandle;
 import org.deidentifier.arx.ARXLattice.ARXNode;
-import org.deidentifier.arx.benchmark.BenchmarkSetup.BenchmarkCriterion;
+import org.deidentifier.arx.benchmark.BenchmarkSetup.BenchmarkPrivacyModel;
 import org.deidentifier.arx.benchmark.BenchmarkSetup.BenchmarkDataset;
 import org.deidentifier.arx.metric.InformationLoss;
 import org.deidentifier.arx.metric.v2.ILMultiDimensionalRank;
@@ -46,10 +46,10 @@ public class BenchmarkExperiment1 {
      * Returns all criteria relevant for this benchmark
      * @return
      */
-    public static BenchmarkCriterion[] getCriteria() {
-        return new BenchmarkCriterion[] {
-                BenchmarkCriterion.K_ANONYMITY,
-                BenchmarkCriterion.UNIQUENESS_DANKAR,
+    public static BenchmarkPrivacyModel[] getCriteria() {
+        return new BenchmarkPrivacyModel[] {
+                BenchmarkPrivacyModel.K_ANONYMITY,
+                BenchmarkPrivacyModel.UNIQUENESS_DANKAR,
         };
     }
     
@@ -63,7 +63,7 @@ public class BenchmarkExperiment1 {
         
         // Repeat for each data set
         for (BenchmarkDataset data : BenchmarkSetup.getDatasets()) {
-            for (BenchmarkCriterion criterion : getCriteria()) {
+            for (BenchmarkPrivacyModel criterion : getCriteria()) {
                 for (int i = 0; i < REPETITIONS; i++) {
                      anonymize(data, criterion);
                 }
@@ -93,9 +93,9 @@ public class BenchmarkExperiment1 {
      * @param dataset
      * @throws IOException
      */
-    private static void anonymize(BenchmarkDataset dataset, BenchmarkCriterion criterion) throws IOException {
+    private static void anonymize(BenchmarkDataset dataset, BenchmarkPrivacyModel criterion) throws IOException {
         Data data = BenchmarkSetup.getData(dataset, criterion);
-        ARXConfiguration config = BenchmarkSetup.getConfiguration(dataset, criterion);
+        ARXConfiguration config = BenchmarkSetup.getConfiguration(dataset, criterion, 0.01d);
         ARXAnonymizer anonymizer = new ARXAnonymizer();
         long time = System.currentTimeMillis();
         ARXResult result = anonymizer.anonymize(data, config);

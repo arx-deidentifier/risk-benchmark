@@ -25,7 +25,7 @@ import org.deidentifier.arx.ARXLattice;
 import org.deidentifier.arx.ARXResult;
 import org.deidentifier.arx.Data;
 import org.deidentifier.arx.ARXLattice.ARXNode;
-import org.deidentifier.arx.benchmark.BenchmarkSetup.BenchmarkCriterion;
+import org.deidentifier.arx.benchmark.BenchmarkSetup.BenchmarkPrivacyModel;
 import org.deidentifier.arx.benchmark.BenchmarkSetup.BenchmarkDataset;
 import org.deidentifier.arx.metric.InformationLoss;
 import org.deidentifier.arx.metric.v2.ILMultiDimensionalRank;
@@ -63,8 +63,8 @@ public class BenchmarkExperiment2 {
      */
     private static void anonymize(BenchmarkDataset dataset) throws IOException {
         
-        Data data = BenchmarkSetup.getData(dataset, BenchmarkCriterion.UNIQUENESS_PITMAN);
-        ARXConfiguration config = BenchmarkSetup.getConfiguration(dataset, BenchmarkCriterion.UNIQUENESS_PITMAN);
+        Data data = BenchmarkSetup.getData(dataset, BenchmarkPrivacyModel.UNIQUENESS_PITMAN);
+        ARXConfiguration config = BenchmarkSetup.getConfiguration(dataset, BenchmarkPrivacyModel.UNIQUENESS_PITMAN, 0.01d);
         ARXAnonymizer anonymizer = new ARXAnonymizer();
         
         // Warmup
