@@ -17,6 +17,7 @@
 
 package org.deidentifier.arx.benchmark;
 
+import java.io.File;
 import java.io.IOException;
 
 import org.deidentifier.arx.ARXAnonymizer;
@@ -31,15 +32,30 @@ import org.deidentifier.arx.metric.InformationLoss;
 import org.deidentifier.arx.metric.v2.ILMultiDimensionalRank;
 import org.deidentifier.arx.risk.ModelPitman;
 
+import de.linearbits.subframe.Benchmark;
+import de.linearbits.subframe.analyzer.ValueBuffer;
+
 /**
  * Main benchmark class.
  * 
  * @author Fabian Prasser
  */
 public class BenchmarkExperiment2 {
-    
+
+    /** The benchmark instance */
+    private static final Benchmark BENCHMARK   = new Benchmark(new String[] { "Dataset", "Polygamma" });
+
+    /** TOTAL */
+    public static final int        TOTAL       = BENCHMARK.addMeasure("Total");
+
+    /** CHECK */
+    public static final int        CHECK       = BENCHMARK.addMeasure("Check");
+
+    /** UTILITY */
+    public static final int        UTILITY     = BENCHMARK.addMeasure("Utility");
+
     /** Repetitions */
-    private static final int REPETITIONS = 5;
+    private static final int       REPETITIONS = 5;
 
     /**
      * Main entry point
@@ -48,10 +64,25 @@ public class BenchmarkExperiment2 {
      * @throws IOException
      */
     public static void main(String[] args) throws IOException {
+
+        // Init
+        BENCHMARK.addAnalyzer(UTILITY, new ValueBuffer());
+        BENCHMARK.addAnalyzer(TOTAL, new ValueBuffer());
+        BENCHMARK.addAnalyzer(CHECK, new ValueBuffer());
         
         // Repeat for each data set
         for (BenchmarkDataset data : BenchmarkSetup.getDatasets()) {
-            anonymize(data);
+
+            // New run
+            BENCHMARK.addRun(data.toString(), "true");
+            anonymize(data, true);
+
+            // New run
+            BENCHMARK.addRun(data.toString(), "false");
+            anonymize(data, false);
+
+            // Write after each experiment
+            BENCHMARK.getResults().write(new File("results/experiment2.csv"));
         }
     }
     
@@ -61,56 +92,29 @@ public class BenchmarkExperiment2 {
      * @param dataset
      * @throws IOException
      */
-    private static void anonymize(BenchmarkDataset dataset) throws IOException {
+    private static void anonymize(BenchmarkDataset dataset, boolean usePolygamma) throws IOException {
         
         Data data = BenchmarkSetup.getData(dataset, BenchmarkPrivacyModel.UNIQUENESS_PITMAN);
         ARXConfiguration config = BenchmarkSetup.getConfiguration(dataset, BenchmarkPrivacyModel.UNIQUENESS_PITMAN, 0.01d);
         ARXAnonymizer anonymizer = new ARXAnonymizer();
         
         // Warmup
-        System.out.println("Dataset: " + dataset);
-        System.out.println(" - Warmup-1");
-        ModelPitman.hookUsePolygamma(true);
+        ModelPitman.hookUsePolygamma(usePolygamma);
         ARXResult result = anonymizer.anonymize(data, config);
-        System.out.println(" - Warmup-2");
-        ModelPitman.hookUsePolygamma(false);
         data.getHandle().release();
-        result = anonymizer.anonymize(data, config);
         
         // Benchmark
-        ModelPitman.hookUsePolygamma(true);
-        long timePolygamma = System.currentTimeMillis();
+        ModelPitman.hookUsePolygamma(usePolygamma);
+        long time = System.currentTimeMillis();
         for (int i = 0; i < REPETITIONS; i++) {
-            System.out.println(" - Run-1 " + i + " of " + REPETITIONS);
+            System.out.println(" - Run-1 " + (i + 1) + " of " + REPETITIONS);
             data.getHandle().release();
             result = anonymizer.anonymize(data, config);
         }
-        timePolygamma = System.currentTimeMillis() - timePolygamma;
-        long checksPolygamma = getNumChecks(result);
-        double utilityPolygamma = getRelativeLoss(result.getGlobalOptimum().getMaximumInformationLoss());
-
-        // Benchmark
-        ModelPitman.hookUsePolygamma(false);
-        long timeWithoutPolygamma = System.currentTimeMillis();
-        for (int i = 0; i < REPETITIONS; i++) {
-            System.out.println(" - Run-2 " + i + " of " + REPETITIONS);
-            data.getHandle().release();
-            result = anonymizer.anonymize(data, config);
-        }
-        timeWithoutPolygamma = System.currentTimeMillis() - timeWithoutPolygamma;
-        long checksWithoutPolygamma = getNumChecks(result);
-        double utilityWithoutPolygamma = getRelativeLoss(result.getGlobalOptimum().getMaximumInformationLoss());
-        
-        System.out.println("Dataset: " + dataset);
-        System.out.println(" - Time with polygamma total: " + timePolygamma + " [ms]");
-        System.out.println(" - Time with polygamma per check: " + (int)((double)timePolygamma / (double)checksPolygamma) + " [ms]");
-        System.out.println(" - Num checks with polygamma: " + checksPolygamma);
-        System.out.println(" - Utility with polygamma: " + utilityPolygamma + " [%]");
-        
-        System.out.println(" - Time without polygamma total: " + timeWithoutPolygamma + " [ms]");
-        System.out.println(" - Time without polygamma per check: " + (int)((double)timeWithoutPolygamma / (double)checksWithoutPolygamma)+ " [ms]");
-        System.out.println(" - Num checks without polygamma: " + checksWithoutPolygamma);
-        System.out.println(" - Utility without polygamma: " + utilityWithoutPolygamma + " [%]");
+        time = System.currentTimeMillis() - time;
+        BENCHMARK.addValue(UTILITY, getRelativeLoss(result.getGlobalOptimum().getMaximumInformationLoss()));
+        BENCHMARK.addValue(TOTAL, (int) time);
+        BENCHMARK.addValue(CHECK, (int) ((double) time / (double) getNumChecks(result)));
     }
     
     /**
