@@ -55,7 +55,7 @@ public class BenchmarkAnalysis3 {
         CSVFile file = new CSVFile(new File("results/experiment3.csv"));
         List<PlotGroup> groups = new ArrayList<PlotGroup>();
 
-        for (BenchmarkDataset dataset : BenchmarkSetup.getDatasets()) {
+        for (BenchmarkDataset dataset : BenchmarkExperiment3.getDatasets()) {
             groups.add(analyze(file, dataset));
         }
         
