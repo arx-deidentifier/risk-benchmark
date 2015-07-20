@@ -70,7 +70,8 @@ public class BenchmarkExperiment3 {
      * @return
      */
     public static double[] getUniqueness() {
-        return new double[]{    0.001d,
+        return new double[]{    
+                                0.001d,
                                 0.002d,
                                 0.003d,
                                 0.004d,
@@ -79,7 +80,22 @@ public class BenchmarkExperiment3 {
                                 0.007d,
                                 0.008d,
                                 0.009d,
-                                0.01d};
+                                0.01d
+                                };
+    }
+
+    /**
+     * Returns all datasets
+     * @return
+     */
+    public static BenchmarkDataset[] getDatasets() {
+        return new BenchmarkDataset[] {
+                BenchmarkDataset.ADULT,
+                BenchmarkDataset.CUP,
+                BenchmarkDataset.FARS,
+                BenchmarkDataset.ATUS,
+                BenchmarkDataset.IHIS
+        };
     }
     
     /**
@@ -96,7 +112,7 @@ public class BenchmarkExperiment3 {
         BENCHMARK.addAnalyzer(TRANSFORMATION, new ValueBuffer());
         
         // Repeat for each data set
-        for (BenchmarkDataset data : BenchmarkSetup.getDatasets()) {
+        for (BenchmarkDataset data : getDatasets()) {
             for (BenchmarkPrivacyModel privacy : getPrivacyModels()) {
                 for (double uniqueness : getUniqueness()) {
                     
