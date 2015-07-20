@@ -27,7 +27,7 @@ import org.deidentifier.arx.Data;
 import org.deidentifier.arx.DataHandle;
 import org.deidentifier.arx.benchmark.BenchmarkSetup.BenchmarkDataset;
 import org.deidentifier.arx.benchmark.BenchmarkSetup.BenchmarkPrivacyModel;
-import org.deidentifier.arx.metric.InformationLoss;
+import org.deidentifier.arx.benchmark.BenchmarkSetup.BenchmarkUtilityMeasure;
 
 import de.linearbits.subframe.Benchmark;
 import de.linearbits.subframe.analyzer.ValueBuffer;
@@ -40,7 +40,7 @@ import de.linearbits.subframe.analyzer.ValueBuffer;
 public class BenchmarkExperiment3 {
 
     /** The benchmark instance */
-    private static final Benchmark BENCHMARK      = new Benchmark(new String[] { "Dataset", "Privacy model", "Uniqueness"});
+    private static final Benchmark BENCHMARK      = new Benchmark(new String[] { "Dataset", "Utility", "Privacy model", "Uniqueness"});
 
     /** Utility */
     public static final int        UTILITY        = BENCHMARK.addMeasure("Utility");
@@ -51,6 +51,20 @@ public class BenchmarkExperiment3 {
     /** Transformation */
     public static final int        TRANSFORMATION = BENCHMARK.addMeasure("Transformation");
 
+    /**
+     * Returns all datasets
+     * @return
+     */
+    public static BenchmarkDataset[] getDatasets() {
+        return new BenchmarkDataset[] {
+                BenchmarkDataset.ADULT,
+                BenchmarkDataset.CUP,
+                BenchmarkDataset.FARS,
+                BenchmarkDataset.ATUS,
+                BenchmarkDataset.IHIS
+        };
+    }
+    
     /**
      * Returns all criteria relevant for this benchmark
      * @return
@@ -63,7 +77,7 @@ public class BenchmarkExperiment3 {
                 BenchmarkPrivacyModel.UNIQUENESS_SNB,
         };
     }
-    
+
     /**
      * Returns all uniqueness parameters
      * @return
@@ -81,20 +95,6 @@ public class BenchmarkExperiment3 {
                                 0.009d,
                                 0.01d
                                 };
-    }
-
-    /**
-     * Returns all datasets
-     * @return
-     */
-    public static BenchmarkDataset[] getDatasets() {
-        return new BenchmarkDataset[] {
-                BenchmarkDataset.ADULT,
-                BenchmarkDataset.CUP,
-                BenchmarkDataset.FARS,
-                BenchmarkDataset.ATUS,
-                BenchmarkDataset.IHIS
-        };
     }
     
     /**
@@ -114,16 +114,18 @@ public class BenchmarkExperiment3 {
         for (BenchmarkDataset data : getDatasets()) {
             for (BenchmarkPrivacyModel privacy : getPrivacyModels()) {
                 for (double uniqueness : getUniqueness()) {
+                    for (BenchmarkUtilityMeasure measure : BenchmarkSetup.getUtilityMeasures()) {
                     
-                    System.out.println(data + "/" + privacy + "/" + uniqueness);
-                    
-                    // New run
-                    BENCHMARK.addRun(data.toString(), privacy.toString(), String.valueOf(uniqueness));
-                    
-                    anonymize(data, privacy, uniqueness);
-                    
-                    // Write after each experiment
-                    BENCHMARK.getResults().write(new File("results/experiment3.csv"));
+                        System.out.println(data + "/" + measure+"/"+privacy + "/" + uniqueness);
+                        
+                        // New run
+                        BENCHMARK.addRun(data.toString(), measure.toString(), privacy.toString(), String.valueOf(uniqueness));
+                        
+                        anonymize(data, measure, privacy, uniqueness);
+                        
+                        // Write after each experiment
+                        BENCHMARK.getResults().write(new File("results/experiment3.csv"));
+                    }
                 }
             }
         }
@@ -133,18 +135,39 @@ public class BenchmarkExperiment3 {
      * Performs the experiments
      * 
      * @param dataset
+     * @param measure 
      * @throws IOException
      */
-    private static void anonymize(BenchmarkDataset dataset, BenchmarkPrivacyModel criterion, double uniqueness) throws IOException {
+    private static void anonymize(BenchmarkDataset dataset, BenchmarkUtilityMeasure measure, BenchmarkPrivacyModel criterion, double uniqueness) throws IOException {
         Data data = BenchmarkSetup.getData(dataset, criterion);
-        ARXConfiguration config = BenchmarkSetup.getConfiguration(dataset, criterion, uniqueness);
+        ARXConfiguration config = BenchmarkSetup.getConfiguration(dataset, measure, criterion, uniqueness);
         ARXAnonymizer anonymizer = new ARXAnonymizer();
         ARXResult result = anonymizer.anonymize(data, config);
-        BENCHMARK.addValue(UTILITY, getRelativeLoss(result.getGlobalOptimum().getMinimumInformationLoss()));
+        BENCHMARK.addValue(UTILITY, BenchmarkMetadata.getRelativeLoss(data.getHandle(),
+                                                                      result.getOutput(),
+                                                                      result.getGlobalOptimum().getTransformation(),
+                                                                      dataset,
+                                                                      measure));
         BENCHMARK.addValue(SUPPRESSED, ((double) getSuppressed(result.getOutput()) / (double) data.getHandle().getNumRows()) * 100d);
         BENCHMARK.addValue(TRANSFORMATION, getTransformation(result));
     }
     
+    /**
+     * Returns the number of suppressed tuples
+     * 
+     * @param output
+     * @return
+     */
+    private static int getSuppressed(DataHandle output) {
+        int count = 0;
+        for (int i = 0; i < output.getNumRows(); i++) {
+            if (output.isOutlier(i)) {
+                count++;
+            }
+        }
+        return count;
+    }
+
     /**
      * Formats the result
      * @param result
@@ -165,30 +188,5 @@ public class BenchmarkExperiment3 {
         }
         string += ")";
         return string;
-    }
-
-    /**
-     * Normalizes the loss utility measure
-     * @param loss
-     * @return
-     */
-    private static double getRelativeLoss(InformationLoss<?> loss) {
-        return Double.valueOf(loss.toString()) * 100d;
-    }
-    
-    /**
-     * Returns the number of suppressed tuples
-     * 
-     * @param output
-     * @return
-     */
-    private static int getSuppressed(DataHandle output) {
-        int count = 0;
-        for (int i = 0; i < output.getNumRows(); i++) {
-            if (output.isOutlier(i)) {
-                count++;
-            }
-        }
-        return count;
     }
 }

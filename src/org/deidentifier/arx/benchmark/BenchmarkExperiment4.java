@@ -30,6 +30,8 @@ import org.deidentifier.arx.Data;
 import org.deidentifier.arx.DataHandle;
 import org.deidentifier.arx.benchmark.BenchmarkSetup.BenchmarkDataset;
 import org.deidentifier.arx.benchmark.BenchmarkSetup.BenchmarkPrivacyModel;
+import org.deidentifier.arx.benchmark.BenchmarkSetup.BenchmarkUtilityMeasure;
+import org.deidentifier.arx.criteria.KAnonymity;
 import org.deidentifier.arx.utility.DataConverter;
 import org.deidentifier.arx.utility.UtilityMeasureNonUniformEntropy;
 import org.deidentifier.arx.utility.UtilityMeasureNonUniformEntropyWithLowerBound;
@@ -98,13 +100,49 @@ public class BenchmarkExperiment4 {
     }
 
     /**
+     * Returns the dataset for the given transformation level
+     * @param result
+     * @param generalization
+     * @return
+     */
+    private static DataHandle getOutput(ARXResult result, double generalization) {
+        
+        int[] transformation = getTransformation(result, generalization);
+        for (ARXNode[] level : result.getLattice().getLevels()) {
+            for (ARXNode node : level) {
+                if (Arrays.equals(transformation, node.getTransformation()))  {
+                    return result.getOutput(node);
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns the transformation for the given transformation level
+     * @param result
+     * @param generalization
+     * @return
+     */
+    private static int[] getTransformation(ARXResult result, double generalization) {
+
+        int[] transformation = result.getGlobalOptimum().getTransformation().clone();
+        for (int i=0; i<transformation.length; i++) {
+            transformation[i] = (int)Math.round(result.getLattice().getTop().getTransformation()[i] * generalization);
+        }
+        return transformation;
+    }
+
+    /**
      * Performs one run
      * @param dataset
      * @throws IOException
      */
     private static void performBenchmark(BenchmarkDataset dataset) throws IOException {
         
-        ARXConfiguration config = BenchmarkSetup.getConfiguration(dataset, BenchmarkPrivacyModel.K_ANONYMITY, 0.01d);
+        ARXConfiguration config = BenchmarkSetup.getConfiguration(dataset, BenchmarkUtilityMeasure.ENTROPY, BenchmarkPrivacyModel.K_ANONYMITY, 0.01d);
+        config.removeCriterion(config.getCriterion(KAnonymity.class));
+        config.addCriterion(new KAnonymity(1));
         Data data = BenchmarkSetup.getData(dataset, BenchmarkPrivacyModel.K_ANONYMITY);
         ARXAnonymizer anonymizer = new ARXAnonymizer();
         ARXResult result = anonymizer.anonymize(data, config);
@@ -152,39 +190,5 @@ public class BenchmarkExperiment4 {
                  BENCHMARK.addValue(ENTROPYWITHBOUND, entropyWithBound);
             }
         }
-    }
-
-    /**
-     * Returns the dataset for the given transformation level
-     * @param result
-     * @param generalization
-     * @return
-     */
-    private static DataHandle getOutput(ARXResult result, double generalization) {
-        
-        int[] transformation = getTransformation(result, generalization);
-        for (ARXNode[] level : result.getLattice().getLevels()) {
-            for (ARXNode node : level) {
-                if (Arrays.equals(transformation, node.getTransformation()))  {
-                    return result.getOutput(node);
-                }
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Returns the transformation for the given transformation level
-     * @param result
-     * @param generalization
-     * @return
-     */
-    private static int[] getTransformation(ARXResult result, double generalization) {
-
-        int[] transformation = result.getGlobalOptimum().getTransformation().clone();
-        for (int i=0; i<transformation.length; i++) {
-            transformation[i] = (int)Math.round(result.getLattice().getTop().getTransformation()[i] * generalization);
-        }
-        return transformation;
     }
 }

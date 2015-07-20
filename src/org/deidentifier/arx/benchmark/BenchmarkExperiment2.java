@@ -28,7 +28,7 @@ import org.deidentifier.arx.ARXResult;
 import org.deidentifier.arx.Data;
 import org.deidentifier.arx.benchmark.BenchmarkSetup.BenchmarkDataset;
 import org.deidentifier.arx.benchmark.BenchmarkSetup.BenchmarkPrivacyModel;
-import org.deidentifier.arx.metric.InformationLoss;
+import org.deidentifier.arx.benchmark.BenchmarkSetup.BenchmarkUtilityMeasure;
 import org.deidentifier.arx.risk.ModelPitman;
 
 import de.linearbits.subframe.Benchmark;
@@ -94,7 +94,7 @@ public class BenchmarkExperiment2 {
     private static void anonymize(BenchmarkDataset dataset, boolean usePolygamma) throws IOException {
         
         Data data = BenchmarkSetup.getData(dataset, BenchmarkPrivacyModel.UNIQUENESS_PITMAN);
-        ARXConfiguration config = BenchmarkSetup.getConfiguration(dataset, BenchmarkPrivacyModel.UNIQUENESS_PITMAN, 0.01d);
+        ARXConfiguration config = BenchmarkSetup.getConfiguration(dataset, BenchmarkUtilityMeasure.LOSS, BenchmarkPrivacyModel.UNIQUENESS_PITMAN, 0.01d);
         ARXAnonymizer anonymizer = new ARXAnonymizer();
         
         // Warmup
@@ -111,7 +111,11 @@ public class BenchmarkExperiment2 {
             result = anonymizer.anonymize(data, config);
         }
         time = System.currentTimeMillis() - time;
-        BENCHMARK.addValue(UTILITY, getRelativeLoss(result.getGlobalOptimum().getMaximumInformationLoss()));
+        BENCHMARK.addValue(UTILITY, BenchmarkMetadata.getRelativeLoss(data.getHandle(),
+                                                                      result.getOutput(),
+                                                                      result.getGlobalOptimum().getTransformation(),
+                                                                      dataset,
+                                                                      BenchmarkUtilityMeasure.LOSS));
         BENCHMARK.addValue(TOTAL, (int) time);
         BENCHMARK.addValue(CHECK, (int) ((double) time / (double) getNumChecks(result)));
     }
@@ -130,15 +134,5 @@ public class BenchmarkExperiment2 {
             }
         }
         return checks;
-    }
-
-
-    /**
-     * Normalizes the loss utility measure
-     * @param loss
-     * @return
-     */
-    private static double getRelativeLoss(InformationLoss<?> loss) {
-        return Double.valueOf(loss.toString()) * 100d;
     }
 }

@@ -21,10 +21,10 @@ import java.io.IOException;
 
 import org.deidentifier.arx.ARXConfiguration;
 import org.deidentifier.arx.ARXPopulationModel;
-import org.deidentifier.arx.ARXSolverConfiguration;
-import org.deidentifier.arx.Data;
 import org.deidentifier.arx.ARXPopulationModel.Region;
+import org.deidentifier.arx.ARXSolverConfiguration;
 import org.deidentifier.arx.AttributeType.Hierarchy;
+import org.deidentifier.arx.Data;
 import org.deidentifier.arx.criteria.KAnonymity;
 import org.deidentifier.arx.criteria.PopulationUniqueness;
 import org.deidentifier.arx.metric.Metric;
@@ -36,39 +36,6 @@ import org.deidentifier.arx.risk.RiskModelPopulationUniqueness.PopulationUniquen
  * @author Fabian Prasser
  */
 public class BenchmarkSetup {
-    
-    public static enum BenchmarkPrivacyModel {
-        K_ANONYMITY {
-            @Override
-            public String toString() {
-                return "k-anonymity";
-            }
-        },
-        UNIQUENESS_DANKAR {
-            @Override
-            public String toString() {
-                return "p-uniqueness (dankar)";
-            }
-        },
-        UNIQUENESS_PITMAN {
-            @Override
-            public String toString() {
-                return "p-uniqueness (pitman)";
-            }
-        },
-        UNIQUENESS_SNB {
-            @Override
-            public String toString() {
-                return "p-uniqueness (snb)";
-            }
-        },
-        UNIQUENESS_ZAYATZ {
-            @Override
-            public String toString() {
-                return "p-uniqueness (zayatz)";
-            }
-        },
-    }
     
     public static enum BenchmarkDataset {
         ADULT {
@@ -103,6 +70,54 @@ public class BenchmarkSetup {
         },
     }
     
+    public static enum BenchmarkPrivacyModel {
+        K_ANONYMITY {
+            @Override
+            public String toString() {
+                return "k-anonymity";
+            }
+        },
+        UNIQUENESS_DANKAR {
+            @Override
+            public String toString() {
+                return "p-uniqueness (dankar)";
+            }
+        },
+        UNIQUENESS_PITMAN {
+            @Override
+            public String toString() {
+                return "p-uniqueness (pitman)";
+            }
+        },
+        UNIQUENESS_SNB {
+            @Override
+            public String toString() {
+                return "p-uniqueness (snb)";
+            }
+        },
+        UNIQUENESS_ZAYATZ {
+            @Override
+            public String toString() {
+                return "p-uniqueness (zayatz)";
+            }
+        },
+    }
+    
+    public static enum BenchmarkUtilityMeasure {
+        ENTROPY {
+            @Override
+            public String toString() {
+                return "Entropy";
+            }
+        },
+        LOSS {
+            @Override
+            public String toString() {
+                return "Loss";
+            }
+        },
+    }
+    
     private static final double[][] SOLVER_START_VALUES = getSolverStartValues();
     
     /**
@@ -113,9 +128,19 @@ public class BenchmarkSetup {
      * @return
      * @throws IOException
      */
-    public static ARXConfiguration getConfiguration(BenchmarkDataset dataset, BenchmarkPrivacyModel criterion, double uniqueness) throws IOException {
+    public static ARXConfiguration getConfiguration(BenchmarkDataset dataset, BenchmarkUtilityMeasure utility, BenchmarkPrivacyModel criterion, double uniqueness) throws IOException {
         ARXConfiguration config = ARXConfiguration.create();
-        config.setMetric(Metric.createLossMetric(AggregateFunction.GEOMETRIC_MEAN));
+        switch (utility) {
+        case ENTROPY:
+            config.setMetric(Metric.createEntropyMetric(false, AggregateFunction.SUM));
+            break;
+        case LOSS:
+            config.setMetric(Metric.createLossMetric(AggregateFunction.GEOMETRIC_MEAN));
+            break;
+        default:
+            throw new IllegalArgumentException("");
+        }
+        
         config.setMaxOutliers(1.0d);
         
         switch (criterion) {
@@ -287,6 +312,15 @@ public class BenchmarkSetup {
         }
     }
     
+    /**
+     * Returns a set of utility measures
+     * @return
+     */
+    public static BenchmarkUtilityMeasure[] getUtilityMeasures() {
+        return new BenchmarkUtilityMeasure[]{BenchmarkUtilityMeasure.ENTROPY,
+                                             BenchmarkUtilityMeasure.LOSS};
+    }
+
     /**
      * Creates start values for the solver
      * @return

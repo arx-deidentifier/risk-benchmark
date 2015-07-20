@@ -18,9 +18,6 @@
 package org.deidentifier.arx.risk;
 
 import org.deidentifier.arx.ARXPopulationModel;
-import org.deidentifier.arx.risk.Gamma;
-import org.deidentifier.arx.risk.RiskModelHistogram;
-import org.deidentifier.arx.risk.RiskModelPopulation;
 import org.deidentifier.arx.risk.RiskEstimateBuilder.WrappedBoolean;
 import org.deidentifier.arx.risk.RiskEstimateBuilder.WrappedInteger;
 
