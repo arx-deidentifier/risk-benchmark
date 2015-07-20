@@ -28,7 +28,6 @@ import org.deidentifier.arx.DataHandle;
 import org.deidentifier.arx.benchmark.BenchmarkSetup.BenchmarkDataset;
 import org.deidentifier.arx.benchmark.BenchmarkSetup.BenchmarkPrivacyModel;
 import org.deidentifier.arx.metric.InformationLoss;
-import org.deidentifier.arx.metric.v2.ILMultiDimensionalRank;
 
 import de.linearbits.subframe.Benchmark;
 import de.linearbits.subframe.analyzer.ValueBuffer;
@@ -174,14 +173,7 @@ public class BenchmarkExperiment3 {
      * @return
      */
     private static double getRelativeLoss(InformationLoss<?> loss) {
-        double[] values = ((ILMultiDimensionalRank) loss).getValue();
-        double result = 1.0d;
-        for (int i = 0; i < values.length; i++) {
-            result *= Math.pow(values[i] + 1d, 1.0d / (double) values.length);
-        }
-        result -= 1d;
-        result *= 100d;
-        return result;
+        return Double.valueOf(loss.toString()) * 100d;
     }
     
     /**

@@ -23,14 +23,13 @@ import java.util.Iterator;
 
 import org.deidentifier.arx.ARXAnonymizer;
 import org.deidentifier.arx.ARXConfiguration;
+import org.deidentifier.arx.ARXLattice.ARXNode;
 import org.deidentifier.arx.ARXResult;
 import org.deidentifier.arx.Data;
 import org.deidentifier.arx.DataHandle;
-import org.deidentifier.arx.ARXLattice.ARXNode;
-import org.deidentifier.arx.benchmark.BenchmarkSetup.BenchmarkPrivacyModel;
 import org.deidentifier.arx.benchmark.BenchmarkSetup.BenchmarkDataset;
+import org.deidentifier.arx.benchmark.BenchmarkSetup.BenchmarkPrivacyModel;
 import org.deidentifier.arx.metric.InformationLoss;
-import org.deidentifier.arx.metric.v2.ILMultiDimensionalRank;
 
 /**
  * Main benchmark class.
@@ -123,20 +122,14 @@ public class BenchmarkExperiment1 {
         System.out.println(" - Relative      : " + getRelativeLoss(result.getGlobalOptimum().getMinimumInformationLoss()));
     }
     
+
     /**
      * Normalizes the loss utility measure
      * @param loss
      * @return
      */
     private static double getRelativeLoss(InformationLoss<?> loss) {
-        double[] values = ((ILMultiDimensionalRank) loss).getValue();
-        double result = 1.0d;
-        for (int i = 0; i < values.length; i++) {
-            result *= Math.pow(values[i] + 1d, 1.0d / (double) values.length);
-        }
-        result -= 1d;
-        result *= 100d;
-        return result;
+        return Double.valueOf(loss.toString()) * 100d;
     }
     
     /**

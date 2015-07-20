@@ -28,6 +28,7 @@ import org.deidentifier.arx.AttributeType.Hierarchy;
 import org.deidentifier.arx.criteria.KAnonymity;
 import org.deidentifier.arx.criteria.PopulationUniqueness;
 import org.deidentifier.arx.metric.Metric;
+import org.deidentifier.arx.metric.Metric.AggregateFunction;
 import org.deidentifier.arx.risk.RiskModelPopulationUniqueness.PopulationUniquenessModel;
 
 /**
@@ -114,7 +115,7 @@ public class BenchmarkSetup {
      */
     public static ARXConfiguration getConfiguration(BenchmarkDataset dataset, BenchmarkPrivacyModel criterion, double uniqueness) throws IOException {
         ARXConfiguration config = ARXConfiguration.create();
-        config.setMetric(Metric.createLossMetric());
+        config.setMetric(Metric.createLossMetric(AggregateFunction.GEOMETRIC_MEAN));
         config.setMaxOutliers(1.0d);
         
         switch (criterion) {
