@@ -98,13 +98,18 @@ public class BenchmarkExperiment2 {
         ARXAnonymizer anonymizer = new ARXAnonymizer();
         
         // Warmup
+        System.out.println("Dataset: " + dataset +". Polygamma: " + usePolygamma);
+        System.out.print("Warmpup...");
+        long time = System.currentTimeMillis(); 
         ModelPitman.hookUsePolygamma(usePolygamma);
         ARXResult result = anonymizer.anonymize(data, config);
         data.getHandle().release();
+        time = System.currentTimeMillis() - time;
+        System.out.println("Done in: " + time + " [ms]");
         
         // Benchmark
         ModelPitman.hookUsePolygamma(usePolygamma);
-        long time = System.currentTimeMillis();
+        time = System.currentTimeMillis();
         for (int i = 0; i < REPETITIONS; i++) {
             System.out.println(" - Run-1 " + (i + 1) + " of " + REPETITIONS);
             data.getHandle().release();
