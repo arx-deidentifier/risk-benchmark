@@ -148,25 +148,25 @@ public class BenchmarkSetup {
             config.addCriterion(new PopulationUniqueness(uniqueness, 
                                                          PopulationUniquenessModel.DANKAR,
                                                          ARXPopulationModel.create(Region.USA),
-                                                         ARXSolverConfiguration.create().startValues(SOLVER_START_VALUES)));
+                                                         ARXSolverConfiguration.create().startValues(SOLVER_START_VALUES).iterationsPerTry(10)));
             break;
         case UNIQUENESS_SNB:
             config.addCriterion(new PopulationUniqueness(uniqueness, 
                                                          PopulationUniquenessModel.SNB,
                                                          ARXPopulationModel.create(Region.USA),
-                                                         ARXSolverConfiguration.create().startValues(SOLVER_START_VALUES)));
+                                                         ARXSolverConfiguration.create().startValues(SOLVER_START_VALUES).iterationsPerTry(10)));
             break;
         case UNIQUENESS_PITMAN:
             config.addCriterion(new PopulationUniqueness(uniqueness, 
                                                          PopulationUniquenessModel.PITMAN,
                                                          ARXPopulationModel.create(Region.USA),
-                                                         ARXSolverConfiguration.create().startValues(SOLVER_START_VALUES)));
+                                                         ARXSolverConfiguration.create().startValues(SOLVER_START_VALUES).iterationsPerTry(10)));
             break;
         case UNIQUENESS_ZAYATZ:
             config.addCriterion(new PopulationUniqueness(uniqueness, 
                                                          PopulationUniquenessModel.ZAYATZ,
                                                          ARXPopulationModel.create(Region.USA),
-                                                         ARXSolverConfiguration.create().startValues(SOLVER_START_VALUES)));
+                                                         ARXSolverConfiguration.create().startValues(SOLVER_START_VALUES).iterationsPerTry(10)));
             break;
         case K_ANONYMITY:
             config.addCriterion(new KAnonymity(5));
@@ -326,10 +326,10 @@ public class BenchmarkSetup {
      * @return
      */
     private static double[][] getSolverStartValues() {
-        double[][] result = new double[121][];
+        double[][] result = new double[16][];
         int index = 0;
-        for (double d1 = -1d; d1 <= +1d; d1 += 0.2d) {
-            for (double d2 = -1d; d2 <= +1d; d2 += 0.2d) {
+        for (double d1 = 0d; d1 < 1d; d1 += 0.33d) {
+            for (double d2 = 0d; d2 < 1d; d2 += 0.33d) {
                 result[index++] = new double[] { d1, d2 };
             }
         }
