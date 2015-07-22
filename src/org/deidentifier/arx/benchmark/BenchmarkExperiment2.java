@@ -99,7 +99,7 @@ public class BenchmarkExperiment2 {
         
         // Warmup
         System.out.println("Dataset: " + dataset +". Polygamma: " + usePolygamma);
-        System.out.print("Warmpup...");
+        System.out.print("Warmup...");
         long time = System.currentTimeMillis(); 
         ModelPitman.hookUsePolygamma(usePolygamma);
         ARXResult result = anonymizer.anonymize(data, config);

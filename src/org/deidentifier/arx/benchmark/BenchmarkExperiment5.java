@@ -99,7 +99,7 @@ public class BenchmarkExperiment5 {
         
         // Warmup
         System.out.println("Dataset: " + dataset +". Binary search: " + useBinarySearch);
-        System.out.print("Warmpup...");
+        System.out.print("Warmup...");
         long time = System.currentTimeMillis(); 
         RiskBasedCriterion.hookUseBinarySearch(useBinarySearch);
         ARXResult result = anonymizer.anonymize(data, config);

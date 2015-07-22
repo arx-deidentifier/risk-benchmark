@@ -99,7 +99,7 @@ public class BenchmarkExperiment6 {
         
         // Warmup
         System.out.println("Dataset: " + dataset +". Lower bound: " + useLowerBounds);
-        System.out.print("Warmpup...");
+        System.out.print("Warmup...");
         long time = System.currentTimeMillis(); 
         FLASHAlgorithmImpl.hookUseLowerBound(useLowerBounds);
         ARXResult result = anonymizer.anonymize(data, config);
