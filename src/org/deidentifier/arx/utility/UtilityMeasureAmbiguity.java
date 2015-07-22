@@ -21,64 +21,62 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Implementation of the Loss measure, as proposed in:<br>
+ * Implementation of the Ambiguity measure, as described in:<br>
  * <br>
- * Iyengar, V.: Transforming data to satisfy privacy constraints. In: Proc Int Conf Knowl Disc Data Mining, p. 279288 (2002)
+ * "Goldberger, Tassa: Efficient Anonymizations with Enhanced Utility
  * 
  * @author Fabian Prasser
  */
-public class UtilityMeasureLoss<T> extends UtilityMeasureAggregatable<T>{
+public class UtilityMeasureAmbiguity extends UtilityMeasure<Double>{
 
     /** Map of losses */
     private final Map<String, Map<String, Double>> loss;
     /** Header */
     private final String[]                         header;
+    /** Domain sizes */
+    private final double[]                         domainSize;
 
     /**
      * Creates a new instance
      * @param hierarchies
      */
-    @SuppressWarnings("unchecked")
-    public UtilityMeasureLoss(String[] header, Map<String, String[][]> hierarchies) {
-        this(header, hierarchies, (AggregateFunction<T>)AggregateFunction.ARITHMETIC_MEAN);
-    }
-
-    /**
-     * Creates a new instance
-     * @param hierarchies
-     */
-    public UtilityMeasureLoss(String[] header, Map<String, String[][]> hierarchies, AggregateFunction<T> function) {
-        super(function);
+    public UtilityMeasureAmbiguity(String[] header, Map<String, String[][]> hierarchies) {
         this.loss = new HashMap<String, Map<String, Double>>();
         this.header = header;
+        this.domainSize = getDomainSize(header, hierarchies);
         for (String attr : hierarchies.keySet()) {
             this.loss.put(attr, getLoss(hierarchies.get(attr)));
         }
     }
 
+    @Override
+    public Utility<Double> evaluate(String[][] input, int[] transformation) {
+
+        double result = 0d;
+        for (String[] row : input) {
+            double resultRow = 1d;
+            for (int i = 0; i < row.length; i++) {
+                resultRow *= getLoss(header[i], row[i]) * domainSize[i];
+            }
+            result += resultRow;
+        }
+        return new UtilityDouble(result);
+    }
 
     /**
-     * Evaluates the utility measure
-     * @param output
-     * @param transformation
+     * Returns the domain sizes
+     * @param header
+     * @param hierarchies
      * @return
      */
-    protected double[] evaluateAggregatable(String[][] input, int[] transformation) {
-        
-        double[] result = new double[input[0].length];
-        
-        for (String[] row : input) {
-            for (int i = 0; i < result.length; i++) {
-                result[i] += getLoss(header[i], row[i]);
-            }
-        }
-        
-        for (int i=0; i<result.length; i++) {
-            result[i] /= input.length;
+    private double[] getDomainSize(String[] header, Map<String, String[][]> hierarchies) {
+        double[] result = new double[header.length];
+        for (int i = 0; i < header.length; i++) {
+            result[i] = hierarchies.get(header[i]).length;
         }
         return result;
     }
-
+    
     /**
      * Build loss
      * @param attribute
@@ -89,7 +87,8 @@ public class UtilityMeasureLoss<T> extends UtilityMeasureAggregatable<T>{
         Double loss = this.loss.get(attribute).get(value);
         return loss != null ? loss : 1d;
     }
-    
+
+
     /**
      * Build loss
      * @param hierarchy
@@ -142,3 +141,4 @@ public class UtilityMeasureLoss<T> extends UtilityMeasureAggregatable<T>{
         return loss;
     }
 }
+

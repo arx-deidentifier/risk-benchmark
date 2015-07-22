@@ -31,7 +31,7 @@ import org.deidentifier.arx.benchmark.BenchmarkSetup.BenchmarkUtilityMeasure;
 import org.deidentifier.arx.utility.AggregateFunction;
 import org.deidentifier.arx.utility.DataConverter;
 import org.deidentifier.arx.utility.UtilityMeasureLoss;
-import org.deidentifier.arx.utility.UtilityMeasureNonUniformEntropyWithLowerBound;
+import org.deidentifier.arx.utility.UtilityMeasureNonUniformEntropyWithLowerBoundNormalized;
 
 /**
  * Bounds on utility
@@ -103,7 +103,7 @@ public class BenchmarkMetadataUtility {
         // Compute metrics
         double outputLoss = new UtilityMeasureLoss<Double>(header, hierarchies, AggregateFunction.GEOMETRIC_MEAN).evaluate(output)
                                                                                                                  .getUtility();
-        double outputEntropy = new UtilityMeasureNonUniformEntropyWithLowerBound<Double>(header, input, hierarchies).evaluate(output, transformation).getUtility();
+        double outputEntropy = new UtilityMeasureNonUniformEntropyWithLowerBoundNormalized<Double>(header, input, hierarchies).evaluate(output, transformation).getUtility();
 
         // Store results
         if (!lower.containsKey(dataset)) {
@@ -141,7 +141,7 @@ public class BenchmarkMetadataUtility {
 
         // Compute metrics
         double outputLoss = new UtilityMeasureLoss<Double>(header, hierarchies, AggregateFunction.GEOMETRIC_MEAN).evaluate(output).getUtility();
-        double outputEntropy = new UtilityMeasureNonUniformEntropyWithLowerBound<Double>(header, input, hierarchies).evaluate(output, transformation).getUtility();
+        double outputEntropy = new UtilityMeasureNonUniformEntropyWithLowerBoundNormalized<Double>(header, input, hierarchies).evaluate(output, transformation).getUtility();
 
         // Store results
         if (!upper.containsKey(dataset)) {

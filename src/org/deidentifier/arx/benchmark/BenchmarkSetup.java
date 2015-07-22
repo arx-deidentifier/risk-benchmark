@@ -132,10 +132,10 @@ public class BenchmarkSetup {
         ARXConfiguration config = ARXConfiguration.create();
         switch (utility) {
         case ENTROPY:
-            config.setMetric(Metric.createEntropyMetric(false, AggregateFunction.SUM));
+            config.setMetric(Metric.createPrecomputedNormalizedEntropyMetric(1.0d, AggregateFunction.SUM));
             break;
         case LOSS:
-            config.setMetric(Metric.createLossMetric(AggregateFunction.GEOMETRIC_MEAN));
+            config.setMetric(Metric.createPrecomputedLossMetric(1.0d, AggregateFunction.GEOMETRIC_MEAN));
             break;
         default:
             throw new IllegalArgumentException("");

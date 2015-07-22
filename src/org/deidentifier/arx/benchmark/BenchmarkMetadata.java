@@ -26,7 +26,7 @@ import org.deidentifier.arx.benchmark.BenchmarkSetup.BenchmarkUtilityMeasure;
 import org.deidentifier.arx.utility.AggregateFunction;
 import org.deidentifier.arx.utility.DataConverter;
 import org.deidentifier.arx.utility.UtilityMeasureLoss;
-import org.deidentifier.arx.utility.UtilityMeasureNonUniformEntropyWithLowerBound;
+import org.deidentifier.arx.utility.UtilityMeasureNonUniformEntropyWithLowerBoundNormalized;
 
 public class BenchmarkMetadata {
     
@@ -65,7 +65,7 @@ public class BenchmarkMetadata {
         double result;
         switch (measure) {
         case ENTROPY: 
-            result = new UtilityMeasureNonUniformEntropyWithLowerBound<Double>(header, input, hierarchies, AggregateFunction.SUM).evaluate(output, transformation).getUtility();
+            result = new UtilityMeasureNonUniformEntropyWithLowerBoundNormalized<Double>(header, input, hierarchies, AggregateFunction.SUM).evaluate(output, transformation).getUtility();
             break;
         case LOSS: 
             result = new UtilityMeasureLoss<Double>(header, hierarchies, AggregateFunction.GEOMETRIC_MEAN).evaluate(output).getUtility();

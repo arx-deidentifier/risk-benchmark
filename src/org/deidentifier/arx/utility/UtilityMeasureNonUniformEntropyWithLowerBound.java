@@ -34,11 +34,11 @@ public class UtilityMeasureNonUniformEntropyWithLowerBound<T> extends UtilityMea
     /** Log */
     private static final double                                  LOG2 = Math.log(2);
     /** Input frequencies */
-    private final Map<String, Map<String, Double>>               frequencyInput;
+    protected final Map<String, Map<String, Double>>               frequencyInput;
     /** Input */
-    private final String[][]                                     input;
+    protected final String[][]                                     input;
     /** Header */
-    private final String[]                                       header;
+    protected final String[]                                       header;
     /** Hierarchies */
     private final Map<String, Map<Integer, Map<String, String>>> hierarchies;
 
@@ -238,7 +238,7 @@ public class UtilityMeasureNonUniformEntropyWithLowerBound<T> extends UtilityMea
      * @param d
      * @return
      */
-    private double log2(double d) {
+    protected double log2(double d) {
         return Math.log(d) / LOG2;
     }
 }
