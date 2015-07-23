@@ -40,7 +40,7 @@ import de.linearbits.subframe.analyzer.ValueBuffer;
 public class BenchmarkExperiment3 {
 
     /** The benchmark instance */
-    private static final Benchmark BENCHMARK      = new Benchmark(new String[] { "Dataset", "Utility", "Privacy model", "Uniqueness"});
+    private static final Benchmark BENCHMARK      = new Benchmark(new String[] { "Dataset", "Utility measure", "Privacy model", "Uniqueness"});
 
     /** Utility */
     public static final int        UTILITY        = BENCHMARK.addMeasure("Utility");

@@ -1,0 +1,4 @@
+;;Total;Check;Utility
+Dataset;LowerBound;Value;Value;Value
+Adult;true;1321.0;264.0;0.027223087483846768
+Adult;false;578509.0;44.0;0.027223087483846768

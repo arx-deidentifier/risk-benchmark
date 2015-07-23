@@ -73,7 +73,7 @@ public class BenchmarkAnalysis6 {
         Series3D series = new Series3D(file, selector, 
                                        new Field("Dataset"),
                                        new Field("LowerBound"),
-                                       new Field("Check", Analyzer.VALUE));
+                                       new Field("Total", Analyzer.VALUE));
         
         series.transform(new Function<Point3D>(){
             @Override
@@ -86,7 +86,7 @@ public class BenchmarkAnalysis6 {
         
         List<Plot<?>> plots = new ArrayList<Plot<?>>();
         plots.add(new PlotHistogramClustered("", 
-                                         new Labels("Dataset", "Time per check [ms]"),
+                                         new Labels("Dataset", "Total time [ms]"),
                                          series));
         
         GnuPlotParams params = new GnuPlotParams();

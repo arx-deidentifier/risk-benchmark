@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.deidentifier.arx.benchmark.BenchmarkSetup.BenchmarkDataset;
+import org.deidentifier.arx.benchmark.BenchmarkSetup.BenchmarkUtilityMeasure;
 
 import de.linearbits.objectselector.Selector;
 import de.linearbits.subframe.analyzer.Analyzer;
@@ -55,8 +56,10 @@ public class BenchmarkAnalysis3 {
         CSVFile file = new CSVFile(new File("results/experiment3.csv"));
         List<PlotGroup> groups = new ArrayList<PlotGroup>();
 
-        for (BenchmarkDataset dataset : BenchmarkExperiment3.getDatasets()) {
-            groups.add(analyze(file, dataset));
+        for (BenchmarkUtilityMeasure measure : BenchmarkSetup.getUtilityMeasures()) {
+            for (BenchmarkDataset dataset : BenchmarkExperiment3.getDatasets()) {
+                groups.add(analyze(file, dataset, measure));
+            }
         }
         
         LaTeX.plot(groups, "results/experiment3");
@@ -70,13 +73,13 @@ public class BenchmarkAnalysis3 {
      * @return
      * @throws ParseException
      */
-    private static PlotGroup analyze(CSVFile file, BenchmarkDataset dataset) throws ParseException{
+    private static PlotGroup analyze(CSVFile file, BenchmarkDataset dataset, BenchmarkUtilityMeasure measure) throws ParseException{
 
-        Series3D series = getSeriesForLinesPlot(file, dataset);
+        Series3D series = getSeriesForLinesPlot(file, dataset, measure);
             
         List<Plot<?>> plots = new ArrayList<Plot<?>>();
         plots.add(new PlotLinesClustered("", 
-                                         new Labels("Uniqueness", "Information loss [%]"),
+                                         new Labels("Uniqueness", "Information loss [0-1]"),
                                          series));
         
         GnuPlotParams params = new GnuPlotParams();
@@ -84,22 +87,24 @@ public class BenchmarkAnalysis3 {
         params.keypos = KeyPos.OUTSIDE_TOP;
         params.size = 1.5d;
         params.minY = 0d;
-        params.maxY = 20d;
-        return new PlotGroup("Comparison of different uniqueness models: " + dataset.toString(), plots, params, 1.0d);
+        params.maxY = 1.0d;
+        return new PlotGroup("Comparison of different uniqueness models: " + dataset.toString() + " - " + measure.toString(), plots, params, 1.0d);
     }
     
 
     /**
      * Returns a series that can be clustered by size
      * @param file
+     * @param measure 
      * @param method
      * @return
      * @throws ParseException
      */
-    private static Series3D getSeriesForLinesPlot(CSVFile file, BenchmarkDataset dataset) throws ParseException {
+    private static Series3D getSeriesForLinesPlot(CSVFile file, BenchmarkDataset dataset, BenchmarkUtilityMeasure measure) throws ParseException {
 
         Selector<String[]> selector = file.getSelectorBuilder()
-                                          .field("Dataset").equals(dataset.toString())
+                                          .field("Dataset").equals(dataset.toString()).and()
+                                          .field("Utility measure").equals(measure.toString())
                                           .build();
                 
         Series3D series = new Series3D(file, selector, 
