@@ -104,7 +104,7 @@ public class BenchmarkExperiment2 {
         ModelPitman.hookUsePolygamma(usePolygamma);
         ARXResult result = anonymizer.anonymize(data, config);
         data.getHandle().release();
-        time = System.currentTimeMillis() - time;
+        time = (System.currentTimeMillis() - time) / REPETITIONS;
         System.out.println("Done in: " + time + " [ms]");
         
         // Benchmark

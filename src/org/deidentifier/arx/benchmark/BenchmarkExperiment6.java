@@ -50,6 +50,9 @@ public class BenchmarkExperiment6 {
     /** CHECK */
     public static final int        CHECK       = BENCHMARK.addMeasure("Check");
 
+    /** CHECK */
+    public static final int        CHECKS       = BENCHMARK.addMeasure("Checks");
+
     /** UTILITY */
     public static final int        UTILITY     = BENCHMARK.addMeasure("Utility");
 
@@ -68,6 +71,7 @@ public class BenchmarkExperiment6 {
         BENCHMARK.addAnalyzer(UTILITY, new ValueBuffer());
         BENCHMARK.addAnalyzer(TOTAL, new ValueBuffer());
         BENCHMARK.addAnalyzer(CHECK, new ValueBuffer());
+        BENCHMARK.addAnalyzer(CHECKS, new ValueBuffer());
         
         // Repeat for each data set
         for (BenchmarkDataset data : BenchmarkSetup.getDatasets()) {
@@ -115,7 +119,7 @@ public class BenchmarkExperiment6 {
             data.getHandle().release();
             result = anonymizer.anonymize(data, config);
         }
-        time = System.currentTimeMillis() - time;
+        time = (System.currentTimeMillis() - time) / REPETITIONS;
         BENCHMARK.addValue(UTILITY, BenchmarkMetadata.getRelativeLoss(data.getHandle(),
                                                                       result.getOutput(),
                                                                       result.getGlobalOptimum().getTransformation(),
@@ -123,6 +127,7 @@ public class BenchmarkExperiment6 {
                                                                       BenchmarkUtilityMeasure.LOSS));
         BENCHMARK.addValue(TOTAL, (int) time);
         BENCHMARK.addValue(CHECK, (int) ((double) time / (double) getNumChecks(result)));
+        BENCHMARK.addValue(CHECKS, (int)  getNumChecks(result));
     }
     
     /**

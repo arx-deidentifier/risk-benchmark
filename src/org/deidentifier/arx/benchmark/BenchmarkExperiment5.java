@@ -115,7 +115,7 @@ public class BenchmarkExperiment5 {
             data.getHandle().release();
             result = anonymizer.anonymize(data, config);
         }
-        time = System.currentTimeMillis() - time;
+        time = (System.currentTimeMillis() - time) / REPETITIONS;
         BENCHMARK.addValue(UTILITY, BenchmarkMetadata.getRelativeLoss(data.getHandle(),
                                                                       result.getOutput(),
                                                                       result.getGlobalOptimum().getTransformation(),

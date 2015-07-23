@@ -20,29 +20,31 @@ package org.deidentifier.arx.benchmark;
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
+import org.deidentifier.arx.DataDefinition;
+import org.deidentifier.arx.benchmark.BenchmarkSetup.BenchmarkDataset;
+import org.deidentifier.arx.benchmark.BenchmarkSetup.BenchmarkPrivacyModel;
 
 import de.linearbits.objectselector.Selector;
-import de.linearbits.subframe.analyzer.Analyzer;
-import de.linearbits.subframe.graph.Field;
-import de.linearbits.subframe.graph.Function;
-import de.linearbits.subframe.graph.Labels;
-import de.linearbits.subframe.graph.Plot;
-import de.linearbits.subframe.graph.PlotHistogramClustered;
-import de.linearbits.subframe.graph.Point3D;
-import de.linearbits.subframe.graph.Series3D;
 import de.linearbits.subframe.io.CSVFile;
-import de.linearbits.subframe.render.GnuPlotParams;
-import de.linearbits.subframe.render.GnuPlotParams.KeyPos;
-import de.linearbits.subframe.render.LaTeX;
-import de.linearbits.subframe.render.PlotGroup;
+import de.linearbits.subframe.io.CSVLine;
 
 /**
  * Example benchmark
  * @author Fabian Prasser
  */
 public class BenchmarkAnalysis6 {
+    
+    private static class BenchmarkResult {
+        public double numChecksWith;
+        public double timeTotalWith;
+        public double numChecksWithout;
+        public double timeTotalWithout;
+        public double solutionSpaceSize;
+    }
 
 	/**
 	 * Main
@@ -53,9 +55,7 @@ public class BenchmarkAnalysis6 {
     public static void main(String[] args) throws IOException, ParseException {
         
         CSVFile file = new CSVFile(new File("results/experiment6.csv"));
-        List<PlotGroup> groups = new ArrayList<PlotGroup>();
-        groups.add(analyze(file));
-        LaTeX.plot(groups, "results/experiment6");
+        analyze(file);
         
     }
     
@@ -64,36 +64,96 @@ public class BenchmarkAnalysis6 {
      * @param file
      * @return
      * @throws ParseException
+     * @throws IOException 
      */
-    private static PlotGroup analyze(CSVFile file) throws ParseException{
+    private static void analyze(CSVFile file) throws ParseException, IOException{
 
         // Selects all rows
-        Selector<String[]> selector = file.getSelectorBuilder().field("LowerBound").equals("true").or().equals("false").build();
-                
-        Series3D series = new Series3D(file, selector, 
-                                       new Field("Dataset"),
-                                       new Field("LowerBound"),
-                                       new Field("Total", Analyzer.VALUE));
+        Selector<String[]> selectorWith = file.getSelectorBuilder().field("LowerBound").equals("true").build();
+        Selector<String[]> selectorWithout = file.getSelectorBuilder().field("LowerBound").equals("false").build();
         
-        series.transform(new Function<Point3D>(){
-            @Override
-            public Point3D apply(Point3D arg0) {
-                return new Point3D(arg0.x,
-                                   arg0.y.equals("true") ? "With lower bound" : "Without lower bound",
-                                   arg0.z);
+        Map<String, BenchmarkResult> results = new HashMap<String, BenchmarkResult>();
+
+        for (Iterator<CSVLine> iter = file.iterator(); iter.hasNext();) {
+            
+            CSVLine line = iter.next();
+
+            String dataset = line.get("", "Dataset");
+            if (!results.containsKey(dataset)) {
+                results.put(dataset, new BenchmarkResult());
             }
-        });
+            
+            if (selectorWith.isSelected(line.getData())) {
+                results.get(dataset).numChecksWith =  Double.valueOf(line.get("Total", "Value")) / Double.valueOf(line.get("Check", "Value"));
+                results.get(dataset).timeTotalWith = Double.valueOf(line.get("Total", "Value"));
+                results.get(dataset).solutionSpaceSize = getSolutionSpaceSize(getDataset(dataset));
+                
+            } else if (selectorWithout.isSelected(line.getData())) {
+                
+                results.get(dataset).numChecksWithout = Double.valueOf(line.get("Total", "Value")) / Double.valueOf(line.get("Check", "Value"));
+                results.get(dataset).timeTotalWithout = Double.valueOf(line.get("Total", "Value"));
+                
+            } else {
+                throw new RuntimeException("Illegal state");
+            }
+        }
         
-        List<Plot<?>> plots = new ArrayList<Plot<?>>();
-        plots.add(new PlotHistogramClustered("", 
-                                         new Labels("Dataset", "Total time [ms]"),
-                                         series));
-        
-        GnuPlotParams params = new GnuPlotParams();
-        params.rotateXTicks = 0;
-        params.keypos = KeyPos.TOP_LEFT;
-        params.size = 1.0d;
-        params.ratio = 0.5d;
-        return new PlotGroup("Comparison of execution times of using the Pitman model with and without the lower bound optimization", plots, params, 1.0d);
+        for (String dataset : results.keySet()) {
+            BenchmarkResult result = results.get(dataset);
+            System.out.println("Dataset: " + dataset);
+            System.out.println(" - Total w/o optimization  : " + result.timeTotalWithout);
+            System.out.println(" - Total with optimization : " + result.timeTotalWith + " (" + getRelative(result.timeTotalWith, result.timeTotalWithout)+"%)");
+            System.out.println(" - Checks w/o optimization : " + result.numChecksWithout);
+            System.out.println(" - Checks with optimization: " + result.numChecksWith + " (" + getRelative(result.numChecksWith, result.numChecksWithout)+"%)");
+            System.out.println(" - Solution space size     : " + result.solutionSpaceSize);
+        }
+    }
+    
+    /**
+     * Computes a relative value
+     * @param first
+     * @param second
+     * @return
+     */
+    private static double getRelative(double first, double second) {
+        return first / second * 100d;
+    }
+
+    /**
+     * Returns the dataset
+     * @param dataset
+     * @return
+     */
+    private static BenchmarkDataset getDataset(String dataset) {
+        if (dataset.equals(BenchmarkDataset.ADULT.toString())) {
+            return BenchmarkDataset.ADULT;
+        }
+        if (dataset.equals(BenchmarkDataset.CUP.toString())) {
+            return BenchmarkDataset.CUP;
+        }
+        if (dataset.equals(BenchmarkDataset.FARS.toString())) {
+            return BenchmarkDataset.FARS;
+        }
+        if (dataset.equals(BenchmarkDataset.ATUS.toString())) {
+            return BenchmarkDataset.ATUS;
+        }
+        if (dataset.equals(BenchmarkDataset.IHIS.toString())) {
+            return BenchmarkDataset.IHIS;
+        }
+        throw new RuntimeException("Illegal state");
+    }
+
+    /**
+     * Returns the size of the solution space
+     * @return
+     * @throws IOException 
+     */
+    private static int getSolutionSpaceSize(BenchmarkDataset dataset) throws IOException {
+        int size = 1;
+        DataDefinition definition = BenchmarkSetup.getData(dataset, BenchmarkPrivacyModel.K_ANONYMITY).getDefinition();
+        for (String qi : definition.getQuasiIdentifiersWithGeneralization()) {
+            size *= definition.getHierarchy(qi)[0].length;
+        }
+        return size;
     }
 }
