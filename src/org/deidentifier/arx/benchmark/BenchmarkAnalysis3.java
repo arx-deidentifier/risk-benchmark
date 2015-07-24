@@ -87,7 +87,7 @@ public class BenchmarkAnalysis3 {
         params.keypos = KeyPos.OUTSIDE_TOP;
         params.size = 1.5d;
         params.minY = 0d;
-        params.maxY = 1.0d;
+        params.maxY = measure == BenchmarkUtilityMeasure.LOSS ? 0.2d : 0.6d;
         return new PlotGroup("Comparison of different uniqueness models: " + dataset.toString() + " - " + measure.toString(), plots, params, 1.0d);
     }
     

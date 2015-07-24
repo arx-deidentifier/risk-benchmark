@@ -103,8 +103,8 @@ public class BenchmarkAnalysis6 {
             System.out.println("Dataset: " + dataset);
             System.out.println(" - Total w/o optimization  : " + result.timeTotalWithout);
             System.out.println(" - Total with optimization : " + result.timeTotalWith + " (" + getRelative(result.timeTotalWith, result.timeTotalWithout)+"%)");
-            System.out.println(" - Checks w/o optimization : " + result.numChecksWithout);
-            System.out.println(" - Checks with optimization: " + result.numChecksWith + " (" + getRelative(result.numChecksWith, result.numChecksWithout)+"%)");
+            System.out.println(" - Checks w/o optimization : " + (int)result.numChecksWithout);
+            System.out.println(" - Checks with optimization: " + (int)result.numChecksWith + " (" + getRelative(result.numChecksWith, result.numChecksWithout)+"%)");
             System.out.println(" - Solution space size     : " + result.solutionSpaceSize);
         }
     }
