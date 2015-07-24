@@ -57,7 +57,7 @@ public class BenchmarkExperiment6 {
     public static final int        UTILITY     = BENCHMARK.addMeasure("Utility");
 
     /** Repetitions */
-    private static final int       REPETITIONS = 5;
+    private static final int       REPETITIONS = 3;
 
     /**
      * Main entry point
