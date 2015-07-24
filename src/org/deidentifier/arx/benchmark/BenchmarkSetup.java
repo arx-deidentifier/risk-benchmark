@@ -148,25 +148,25 @@ public class BenchmarkSetup {
             config.addCriterion(new PopulationUniqueness(uniqueness, 
                                                          PopulationUniquenessModel.DANKAR,
                                                          ARXPopulationModel.create(Region.USA),
-                                                         ARXSolverConfiguration.create().startValues(SOLVER_START_VALUES).iterationsPerTry(10)));
+                                                         ARXSolverConfiguration.create().preparedStartValues(SOLVER_START_VALUES).iterationsPerTry(15)));
             break;
         case UNIQUENESS_SNB:
             config.addCriterion(new PopulationUniqueness(uniqueness, 
                                                          PopulationUniquenessModel.SNB,
                                                          ARXPopulationModel.create(Region.USA),
-                                                         ARXSolverConfiguration.create().startValues(SOLVER_START_VALUES).iterationsPerTry(10)));
+                                                         ARXSolverConfiguration.create().preparedStartValues(SOLVER_START_VALUES).iterationsPerTry(15)));
             break;
         case UNIQUENESS_PITMAN:
             config.addCriterion(new PopulationUniqueness(uniqueness, 
                                                          PopulationUniquenessModel.PITMAN,
                                                          ARXPopulationModel.create(Region.USA),
-                                                         ARXSolverConfiguration.create().startValues(SOLVER_START_VALUES).iterationsPerTry(10)));
+                                                         ARXSolverConfiguration.create().preparedStartValues(SOLVER_START_VALUES).iterationsPerTry(15)));
             break;
         case UNIQUENESS_ZAYATZ:
             config.addCriterion(new PopulationUniqueness(uniqueness, 
                                                          PopulationUniquenessModel.ZAYATZ,
                                                          ARXPopulationModel.create(Region.USA),
-                                                         ARXSolverConfiguration.create().startValues(SOLVER_START_VALUES).iterationsPerTry(10)));
+                                                         ARXSolverConfiguration.create().preparedStartValues(SOLVER_START_VALUES).iterationsPerTry(15)));
             break;
         case K_ANONYMITY:
             config.addCriterion(new KAnonymity(5));
@@ -335,5 +335,4 @@ public class BenchmarkSetup {
         }
         return result;
     }
-
 }
