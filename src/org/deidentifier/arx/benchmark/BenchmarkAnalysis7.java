@@ -62,7 +62,7 @@ public class BenchmarkAnalysis7 {
             }
         }
         
-        LaTeX.plot(groups, "results/experiment7", true);
+        LaTeX.plot(groups, "results/experiment7", false);
         
     }
     
