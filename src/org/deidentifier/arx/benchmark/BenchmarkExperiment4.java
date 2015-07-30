@@ -143,7 +143,7 @@ public class BenchmarkExperiment4 {
         ARXConfiguration config = BenchmarkSetup.getConfiguration(dataset, BenchmarkUtilityMeasure.ENTROPY, BenchmarkPrivacyModel.K_ANONYMITY, 0.01d);
         config.removeCriterion(config.getCriterion(KAnonymity.class));
         config.addCriterion(new KAnonymity(1));
-        Data data = BenchmarkSetup.getData(dataset, BenchmarkPrivacyModel.K_ANONYMITY);
+        Data data = BenchmarkSetup.getData(dataset);
         ARXAnonymizer anonymizer = new ARXAnonymizer();
         ARXResult result = anonymizer.anonymize(data, config);
 

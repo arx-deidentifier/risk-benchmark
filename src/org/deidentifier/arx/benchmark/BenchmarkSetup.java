@@ -27,6 +27,7 @@ import org.deidentifier.arx.AttributeType.Hierarchy;
 import org.deidentifier.arx.Data;
 import org.deidentifier.arx.criteria.KAnonymity;
 import org.deidentifier.arx.criteria.PopulationUniqueness;
+import org.deidentifier.arx.criteria.SampleUniqueness;
 import org.deidentifier.arx.metric.Metric;
 import org.deidentifier.arx.metric.Metric.AggregateFunction;
 import org.deidentifier.arx.risk.RiskModelPopulationUniqueness.PopulationUniquenessModel;
@@ -100,6 +101,12 @@ public class BenchmarkSetup {
             public String toString() {
                 return "p-uniqueness (zayatz)";
             }
+        }, 
+        UNIQUENESS_SAMPLE {
+            @Override
+            public String toString() {
+                return "p-sample-uniqueness";
+            }
         },
     }
     
@@ -128,7 +135,11 @@ public class BenchmarkSetup {
      * @return
      * @throws IOException
      */
-    public static ARXConfiguration getConfiguration(BenchmarkDataset dataset, BenchmarkUtilityMeasure utility, BenchmarkPrivacyModel criterion, double uniqueness) throws IOException {
+    public static ARXConfiguration getConfiguration(BenchmarkDataset dataset, 
+                                                    BenchmarkUtilityMeasure utility, 
+                                                    BenchmarkPrivacyModel criterion, 
+                                                    double uniqueness) throws IOException {
+        
         ARXConfiguration config = ARXConfiguration.create();
         switch (utility) {
         case ENTROPY:
@@ -168,8 +179,11 @@ public class BenchmarkSetup {
                                                          ARXPopulationModel.create(Region.USA),
                                                          ARXSolverConfiguration.create().preparedStartValues(SOLVER_START_VALUES).iterationsPerTry(15)));
             break;
+        case UNIQUENESS_SAMPLE:
+            config.addCriterion(new SampleUniqueness(uniqueness));
+            break;
         case K_ANONYMITY:
-            config.addCriterion(new KAnonymity(5));
+            config.addCriterion(new KAnonymity(getK(uniqueness)));
             break;
         default:
             throw new RuntimeException("Invalid criterion");
@@ -185,7 +199,7 @@ public class BenchmarkSetup {
      * @throws IOException
      */
     
-    public static Data getData(BenchmarkDataset dataset, BenchmarkPrivacyModel criterion) throws IOException {
+    public static Data getData(BenchmarkDataset dataset) throws IOException {
         Data data = null;
         switch (dataset) {
         case ADULT:
@@ -319,6 +333,32 @@ public class BenchmarkSetup {
     public static BenchmarkUtilityMeasure[] getUtilityMeasures() {
         return new BenchmarkUtilityMeasure[]{BenchmarkUtilityMeasure.ENTROPY,
                                              BenchmarkUtilityMeasure.LOSS};
+    }
+
+    public static int getK(double uniqueness) {
+        if (uniqueness == 0.001d) {
+            return 3;
+        } else if (uniqueness == 0.002d) {
+            return 4;
+        } else if (uniqueness == 0.003d) {
+            return 5;
+        } else if (uniqueness == 0.004d) {
+            return 10;
+        } else if (uniqueness == 0.005d) {
+            return 15;
+        } else if (uniqueness == 0.006d) {
+            return 20;
+        } else if (uniqueness == 0.007d) {
+            return 25;
+        } else if (uniqueness == 0.008d) {
+            return 50;
+        } else if (uniqueness == 0.009d) {
+            return 75;
+        } else if (uniqueness == 0.01d) {
+            return 100;
+        } else {
+            throw new IllegalArgumentException("Unknown uniqueness parameter");
+        }
     }
 
     /**

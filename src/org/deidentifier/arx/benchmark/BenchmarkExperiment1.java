@@ -150,8 +150,8 @@ public class BenchmarkExperiment1 {
      * @throws IOException
      */
     private static void anonymize(BenchmarkDataset dataset, BenchmarkUtilityMeasure measure, BenchmarkPrivacyModel criterion) throws IOException {
-        Data data = BenchmarkSetup.getData(dataset, criterion);
-        ARXConfiguration config = BenchmarkSetup.getConfiguration(dataset, measure, criterion, 0.01d);
+        Data data = BenchmarkSetup.getData(dataset);
+        ARXConfiguration config = BenchmarkSetup.getConfiguration(dataset, measure, criterion, criterion == BenchmarkPrivacyModel.K_ANONYMITY ? 0.003d : 0.01d);
         ARXAnonymizer anonymizer = new ARXAnonymizer();
         long time = System.currentTimeMillis();
         ARXResult result = anonymizer.anonymize(data, config);

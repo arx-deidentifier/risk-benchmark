@@ -26,7 +26,6 @@ import java.util.Map;
 
 import org.deidentifier.arx.DataDefinition;
 import org.deidentifier.arx.benchmark.BenchmarkSetup.BenchmarkDataset;
-import org.deidentifier.arx.benchmark.BenchmarkSetup.BenchmarkPrivacyModel;
 
 import de.linearbits.objectselector.Selector;
 import de.linearbits.subframe.io.CSVFile;
@@ -150,7 +149,7 @@ public class BenchmarkAnalysis6 {
      */
     private static int getSolutionSpaceSize(BenchmarkDataset dataset) throws IOException {
         int size = 1;
-        DataDefinition definition = BenchmarkSetup.getData(dataset, BenchmarkPrivacyModel.K_ANONYMITY).getDefinition();
+        DataDefinition definition = BenchmarkSetup.getData(dataset).getDefinition();
         for (String qi : definition.getQuasiIdentifiersWithGeneralization()) {
             size *= definition.getHierarchy(qi)[0].length;
         }

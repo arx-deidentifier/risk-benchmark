@@ -92,6 +92,13 @@
                 <attribute name="Main-Class" value="org.deidentifier.arx.benchmark.BenchmarkExperiment6" />
             </manifest>
         </jar>
+        <jar destfile="jars/experiment-7-v${version}.jar">
+            <zipfileset src="build/extLibs/lib.jar" excludes="META-INF/*.RSA,META-INF/*.SF,META-INF/*.DSA" />
+            <fileset dir="build/lib" defaultexcludes="no" />
+            <manifest>
+                <attribute name="Main-Class" value="org.deidentifier.arx.benchmark.BenchmarkExperiment7" />
+            </manifest>
+        </jar>
     </target>
 
     <target name="jars" depends="jar-libs">

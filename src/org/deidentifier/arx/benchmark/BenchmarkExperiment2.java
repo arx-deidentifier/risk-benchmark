@@ -93,7 +93,7 @@ public class BenchmarkExperiment2 {
      */
     private static void anonymize(BenchmarkDataset dataset, boolean usePolygamma) throws IOException {
         
-        Data data = BenchmarkSetup.getData(dataset, BenchmarkPrivacyModel.UNIQUENESS_PITMAN);
+        Data data = BenchmarkSetup.getData(dataset);
         ARXConfiguration config = BenchmarkSetup.getConfiguration(dataset, BenchmarkUtilityMeasure.LOSS, BenchmarkPrivacyModel.UNIQUENESS_PITMAN, 0.01d);
         ARXAnonymizer anonymizer = new ARXAnonymizer();
         

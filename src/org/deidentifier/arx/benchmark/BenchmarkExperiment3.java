@@ -139,7 +139,7 @@ public class BenchmarkExperiment3 {
      * @throws IOException
      */
     private static void anonymize(BenchmarkDataset dataset, BenchmarkUtilityMeasure measure, BenchmarkPrivacyModel criterion, double uniqueness) throws IOException {
-        Data data = BenchmarkSetup.getData(dataset, criterion);
+        Data data = BenchmarkSetup.getData(dataset);
         ARXConfiguration config = BenchmarkSetup.getConfiguration(dataset, measure, criterion, uniqueness);
         ARXAnonymizer anonymizer = new ARXAnonymizer();
         ARXResult result = anonymizer.anonymize(data, config);

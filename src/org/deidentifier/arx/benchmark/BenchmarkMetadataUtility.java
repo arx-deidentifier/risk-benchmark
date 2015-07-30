@@ -26,7 +26,6 @@ import org.deidentifier.arx.Data;
 import org.deidentifier.arx.DataDefinition;
 import org.deidentifier.arx.DataHandle;
 import org.deidentifier.arx.benchmark.BenchmarkSetup.BenchmarkDataset;
-import org.deidentifier.arx.benchmark.BenchmarkSetup.BenchmarkPrivacyModel;
 import org.deidentifier.arx.benchmark.BenchmarkSetup.BenchmarkUtilityMeasure;
 import org.deidentifier.arx.utility.AggregateFunction;
 import org.deidentifier.arx.utility.DataConverter;
@@ -87,7 +86,7 @@ public class BenchmarkMetadataUtility {
      */
     private void computeLowerBounds(BenchmarkDataset dataset) throws IOException {
         // Prepare
-        Data data = BenchmarkSetup.getData(dataset, BenchmarkPrivacyModel.K_ANONYMITY);
+        Data data = BenchmarkSetup.getData(dataset);
         DataDefinition definition = data.getDefinition();
         DataHandle inputHandle = data.getHandle();
 
@@ -120,7 +119,7 @@ public class BenchmarkMetadataUtility {
      */
     private void computeUpperBounds(BenchmarkDataset dataset) throws IOException {
         // Prepare
-        Data data = BenchmarkSetup.getData(dataset, BenchmarkPrivacyModel.K_ANONYMITY);
+        Data data = BenchmarkSetup.getData(dataset);
         DataDefinition definition = data.getDefinition();
         DataHandle inputHandle = data.getHandle();
 
