@@ -97,7 +97,7 @@ public abstract class BenchmarkExperimentStrictAverage {
         Data data = getDataObject(dataset);
 
         System.out.println(dataset);
-        System.out.println("(2,5)-strict;(3,5)-strict;(5)-anonymity");
+        System.out.println("(3,10)-strict;(5,10)-strict;(10)-anonymity");
         analyze(data);
     }
 
@@ -105,8 +105,8 @@ public abstract class BenchmarkExperimentStrictAverage {
         ARXConfiguration config = ARXConfiguration.create();
         config.setMetric(Metric.createPrecomputedLossMetric(1.0d, 0.5d, AggregateFunction.GEOMETRIC_MEAN));
         config.setMaxOutliers(1d);
-        config.addCriterion(new KAnonymity(2));
-        config.addCriterion(new AverageReidentificationRisk(0.2));
+        config.addCriterion(new KAnonymity(3));
+        config.addCriterion(new AverageReidentificationRisk(0.1));
         
         ARXAnonymizer anonymizer = new ARXAnonymizer();
         ARXResult result = anonymizer.anonymize(data, config);
@@ -118,8 +118,8 @@ public abstract class BenchmarkExperimentStrictAverage {
         config = ARXConfiguration.create();
         config.setMetric(Metric.createPrecomputedLossMetric(1.0d, 0.5d, AggregateFunction.GEOMETRIC_MEAN));
         config.setMaxOutliers(1d);
-        config.addCriterion(new KAnonymity(3));
-        config.addCriterion(new AverageReidentificationRisk(0.2));
+        config.addCriterion(new KAnonymity(5));
+        config.addCriterion(new AverageReidentificationRisk(0.1));
         
         anonymizer = new ARXAnonymizer();
         result = anonymizer.anonymize(data, config);
@@ -131,7 +131,7 @@ public abstract class BenchmarkExperimentStrictAverage {
         config = ARXConfiguration.create();
         config.setMetric(Metric.createPrecomputedLossMetric(1.0d, 0.5d, AggregateFunction.GEOMETRIC_MEAN));
         config.setMaxOutliers(1d);
-        config.addCriterion(new KAnonymity(5));
+        config.addCriterion(new KAnonymity(10));
         
         anonymizer = new ARXAnonymizer();
         result = anonymizer.anonymize(data, config);
