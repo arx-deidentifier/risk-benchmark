@@ -72,14 +72,32 @@ public abstract class BenchmarkExperimentScalability {
     /** TOTAL */
     public static final int         UTILITY_ANONYMITY      = BENCHMARK.addMeasure("utility-(5)-anonymity");
 
-    /** VALUE*/
-    private static final double[][] SOLVER_START_VALUES = getSolverStartValues();
-    /** VALUE*/
-    private static final double POPULATION_USA = 318.9 * Math.pow(10d, 6d);
-    /** VALUE*/
-    private static final int REPETITIONS = 5;
-    
+    /** VALUE */
+    private static final double[][] SOLVER_START_VALUES    = getSolverStartValues();
+    /** VALUE */
+    private static final double     POPULATION_USA         = 318.9 * Math.pow(10d, 6d);
+    /** VALUE */
+    private static final int        REPETITIONS            = 5;
+    /** START_INDEX */
+    private static int              START_INDEX            = 0;
+
     public static void main(String[] args) throws IOException {
+        
+        // Parse commandline
+        if (args != null && args.length != 0) {
+            
+            int index = -1;
+            try {
+                index = Integer.parseInt(args[0]);
+            } catch (Exception e) {
+                index = -1;
+            }
+            if (index != -1) {
+                START_INDEX = index;
+            } else {
+                START_INDEX = 0;
+            }
+        }
 
         // Init
         BENCHMARK.addAnalyzer(TIME_UNIQUENESS, new ValueBuffer());
@@ -88,10 +106,11 @@ public abstract class BenchmarkExperimentScalability {
         BENCHMARK.addAnalyzer(UTILITY_UNIQUENESS, new ValueBuffer());
         BENCHMARK.addAnalyzer(UTILITY_STRICT_AVERAGE, new ValueBuffer());
         BENCHMARK.addAnalyzer(UTILITY_ANONYMITY, new ValueBuffer());
-        
+
         // Perform
-        for (String dataset : new String[]{"adult", "cup", "fars", "atus", "ihis" }) { 
-            analyze(dataset);
+        String[] datasets = new String[] { "adult", "cup", "fars", "atus", "ihis" };
+        for (int i = START_INDEX; i < datasets.length; i++) {
+            analyze(datasets[i]);
         }
     }
 
